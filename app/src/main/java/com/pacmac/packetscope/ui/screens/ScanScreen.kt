@@ -94,6 +94,7 @@ fun ScanScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
+                    .statusBarsPadding()
                     .padding(horizontal = 16.dp)
             ) {
                 Spacer(modifier = Modifier.height(16.dp))

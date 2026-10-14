@@ -291,8 +291,7 @@ fun PacketScopeApp(scannerViewModel: ScannerViewModel) {
                     )
                 )
             }
-        },
-        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+        }
     ) { paddingValues ->
         NavHost(
             navController = navController,

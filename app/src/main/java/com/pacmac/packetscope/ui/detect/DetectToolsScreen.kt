@@ -27,6 +27,7 @@ fun DetectToolsScreen(navController: NavController) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF0B0B14))
+            .statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {

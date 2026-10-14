@@ -26,6 +26,7 @@ fun HistoryScreen() {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF0B0B14))
+            .statusBarsPadding()
             .verticalScroll(rememberScrollState())
     ) {
         // Header

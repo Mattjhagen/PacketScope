@@ -32,6 +32,7 @@ fun MapScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF0B0B14))
+            .statusBarsPadding()
             .padding(16.dp)
     ) {
         Text(
