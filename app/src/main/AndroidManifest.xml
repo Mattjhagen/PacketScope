@@ -18,6 +18,9 @@
     <!-- NFC permission -->
     <uses-permission android:name="android.permission.NFC" />
 
+    <!-- Camera permission -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <!-- Required hardware features -->
     <uses-feature
         android:name="android.hardware.bluetooth_le"
@@ -25,6 +28,9 @@
     <uses-feature
         android:name="android.hardware.nfc"
         android:required="true" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
     <application
         android:allowBackup="true"
