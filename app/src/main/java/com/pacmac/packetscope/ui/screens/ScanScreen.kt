@@ -1,9 +1,12 @@
 package com.pacmac.packetscope.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -14,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.pacmac.packetscope.R
 import com.pacmac.packetscope.viewmodel.PacketRecord
@@ -73,33 +77,89 @@ fun ScanScreen(
         matchesProtocol && matchesSearch && matchesRssi
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
-        ) {
-        // Status
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = if (isScanning) "BLE: LIVE" else "BLE: IDLE",
-                style = MaterialTheme.typography.titleMedium,
-                color = if (isScanning) Color(0xFF00BCD4) else MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = if (isNfcListening) "NFC: LISTENING" else "NFC: OFF",
-                style = MaterialTheme.typography.titleMedium,
-                color = if (isNfcListening) Color(0xFF9C27B0) else MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+    // Calculate counts for chips
+    val totalDevices = state.packets.size
+    val veryClose = state.packets.count { it.rssi >= -60 }
+    val unnamedStrong = state.packets.count {
+        (it.deviceName.contains("Unknown", ignoreCase = true) ||
+         it.deviceName.isBlank()) && it.rssi >= -60
+    }
 
-        Spacer(modifier = Modifier.height(16.dp))
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) },
+            containerColor = Color(0xFF0B0B14)
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp)
+            ) {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Header with status
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "RF Detector",
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        letterSpacing = (-0.5).sp
+                    )
+                    Surface(
+                        color = if (isScanning) Color(0xFF00D8FF).copy(alpha = 0.2f) else Color(0xFF9AA0B4).copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .background(
+                                        if (isScanning) Color(0xFF00D8FF) else Color(0xFF9AA0B4),
+                                        shape = RoundedCornerShape(4.dp)
+                                    )
+                            )
+                            Text(
+                                text = if (isScanning) "LIVE" else "IDLE",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isScanning) Color(0xFF00D8FF) else Color(0xFF9AA0B4)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Count chips
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    CountChip(
+                        label = "$totalDevices devices",
+                        modifier = Modifier.weight(1f)
+                    )
+                    CountChip(
+                        label = "$veryClose very close",
+                        modifier = Modifier.weight(1f)
+                    )
+                    CountChip(
+                        label = "$unnamedStrong new to you",
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
 
         // Buttons
         Row(
@@ -367,6 +427,7 @@ fun ScanScreen(
                 }
             }
         }
+            }
         }
     }
 }
@@ -532,4 +593,34 @@ private fun getDistanceColor(rssi: Int): Color {
 private fun formatTimestamp(timestamp: Long): String {
     val sdf = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
     return sdf.format(Date(timestamp))
+}
+
+@Composable
+private fun CountChip(
+    label: String,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier
+            .height(32.dp)
+            .border(
+                width = 1.dp,
+                color = Color(0xFF262636),
+                shape = RoundedCornerShape(16.dp)
+            ),
+        color = Color(0xFF1A1A26),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = label,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.White
+            )
+        }
+    }
 }
