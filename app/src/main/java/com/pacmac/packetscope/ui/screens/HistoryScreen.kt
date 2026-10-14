@@ -1,8 +1,10 @@
 package com.pacmac.packetscope.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -27,7 +29,6 @@ fun HistoryScreen() {
             .fillMaxSize()
             .background(Color(0xFF0B0B14))
             .statusBarsPadding()
-            .verticalScroll(rememberScrollState())
     ) {
         // Header
         Row(
@@ -37,42 +38,46 @@ fun HistoryScreen() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
                     text = "History",
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = Color.White,
+                    letterSpacing = (-0.5).sp
                 )
-                Text(
-                    text = "0 sessions",
-                    fontSize = 14.sp,
-                    color = Color(0xFF9AA0B4)
-                )
-            }
-
-            Button(
-                onClick = { /* Export */ },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF00D8FF)
-                ),
-                shape = RoundedCornerShape(20.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.FileDownload,
-                    contentDescription = null,
-                    tint = Color.Black,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Export", color = Color.Black, fontSize = 14.sp)
+                Surface(
+                    color = Color(0xFF9AA0B4).copy(alpha = 0.2f),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .background(Color(0xFF9AA0B4), shape = CircleShape)
+                        )
+                        Text(
+                            text = "IDLE",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF9AA0B4)
+                        )
+                    }
+                }
             }
         }
 
         // Tabs
         TabRow(
             selectedTabIndex = selectedTab,
-            containerColor = Color(0xFF12121E),
+            containerColor = Color(0xFF0B0B14),
             contentColor = Color(0xFF00D8FF)
         ) {
             tabs.forEachIndexed { index, title ->
@@ -83,20 +88,19 @@ fun HistoryScreen() {
                         Text(
                             text = title,
                             fontSize = 14.sp,
-                            fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal
+                            fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Medium,
+                            color = if (selectedTab == index) Color(0xFF00D8FF) else Color(0xFF9AA0B4)
                         )
                     }
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
         // Tab content - empty states
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(40.dp),
+                .fillMaxSize()
+                .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -104,7 +108,7 @@ fun HistoryScreen() {
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Icon(
-                    imageVector = if (selectedTab == 2) Icons.Default.Search else Icons.Default.Search,
+                    imageVector = Icons.Default.Search,
                     contentDescription = null,
                     tint = Color(0xFF9AA0B4),
                     modifier = Modifier.size(64.dp)
@@ -113,10 +117,10 @@ fun HistoryScreen() {
                     text = when (selectedTab) {
                         0 -> "No scan sessions yet"
                         1 -> "No devices recorded"
-                        2 -> "No threats flagged"
+                        2 -> "No threats flagged yet"
                         else -> ""
                     },
-                    fontSize = 16.sp,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
@@ -127,7 +131,7 @@ fun HistoryScreen() {
                         2 -> "Flag devices from scans as threats"
                         else -> ""
                     },
-                    fontSize = 14.sp,
+                    fontSize = 16.sp,
                     color = Color(0xFF9AA0B4)
                 )
             }
