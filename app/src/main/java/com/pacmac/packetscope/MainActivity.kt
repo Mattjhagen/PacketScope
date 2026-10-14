@@ -9,14 +9,21 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.RadioButtonChecked
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.pacmac.packetscope.ui.screens.DetectScreen
 import com.pacmac.packetscope.ui.screens.HistoryScreen
@@ -130,6 +137,8 @@ fun PermissionRationaleDialog(
 fun PacketScopeApp() {
     val navController = rememberNavController()
     val viewModel: ScannerViewModel = viewModel()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
 
     Scaffold(
         bottomBar = {
@@ -137,28 +146,56 @@ fun PacketScopeApp() {
                 containerColor = MaterialTheme.colorScheme.surfaceVariant
             ) {
                 NavigationBarItem(
-                    icon = {},
+                    icon = { Icon(Icons.Default.RadioButtonChecked, contentDescription = null) },
                     label = { Text(stringResource(R.string.scan)) },
-                    selected = false,
-                    onClick = { navController.navigate("scan") }
+                    selected = currentDestination?.hierarchy?.any { it.route == "scan" } == true,
+                    onClick = { navController.navigate("scan") },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.onSecondary,
+                        selectedTextColor = MaterialTheme.colorScheme.secondary,
+                        indicatorColor = MaterialTheme.colorScheme.secondary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 )
                 NavigationBarItem(
-                    icon = {},
+                    icon = { Icon(Icons.Default.Search, contentDescription = null) },
                     label = { Text(stringResource(R.string.detect)) },
-                    selected = false,
-                    onClick = { navController.navigate("detect") }
+                    selected = currentDestination?.hierarchy?.any { it.route == "detect" } == true,
+                    onClick = { navController.navigate("detect") },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.onSecondary,
+                        selectedTextColor = MaterialTheme.colorScheme.secondary,
+                        indicatorColor = MaterialTheme.colorScheme.secondary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 )
                 NavigationBarItem(
-                    icon = {},
+                    icon = { Icon(Icons.Default.History, contentDescription = null) },
                     label = { Text(stringResource(R.string.history)) },
-                    selected = false,
-                    onClick = { navController.navigate("history") }
+                    selected = currentDestination?.hierarchy?.any { it.route == "history" } == true,
+                    onClick = { navController.navigate("history") },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.onSecondary,
+                        selectedTextColor = MaterialTheme.colorScheme.secondary,
+                        indicatorColor = MaterialTheme.colorScheme.secondary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 )
                 NavigationBarItem(
-                    icon = {},
+                    icon = { Icon(Icons.Default.Map, contentDescription = null) },
                     label = { Text(stringResource(R.string.map)) },
-                    selected = false,
-                    onClick = { navController.navigate("map") }
+                    selected = currentDestination?.hierarchy?.any { it.route == "map" } == true,
+                    onClick = { navController.navigate("map") },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.onSecondary,
+                        selectedTextColor = MaterialTheme.colorScheme.secondary,
+                        indicatorColor = MaterialTheme.colorScheme.secondary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 )
             }
         }
@@ -169,7 +206,7 @@ fun PacketScopeApp() {
             modifier = Modifier.padding(paddingValues)
         ) {
             composable("scan") {
-                ScanScreen(viewModel)
+                ScanScreen(viewModel, navController)
             }
             composable("detect") {
                 DetectScreen()
@@ -179,6 +216,11 @@ fun PacketScopeApp() {
             }
             composable("map") {
                 MapScreen()
+            }
+            composable("detail/{packetId}") { backStackEntry ->
+                val packetId = backStackEntry.arguments?.getString("packetId")
+                val packet = viewModel.state.value.packets.find { it.id == packetId }
+                DetailScreen(packet)
             }
         }
     }
