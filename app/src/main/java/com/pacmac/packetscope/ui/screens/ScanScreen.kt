@@ -4,10 +4,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,6 +23,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScanScreen(
     viewModel: ScannerViewModel,
@@ -32,6 +34,35 @@ fun ScanScreen(
     val scanError by viewModel.scanError.collectAsState()
     val isNfcListening by viewModel.isNfcListening.collectAsState()
     val nfcStatus by viewModel.nfcStatus.collectAsState()
+
+    // Filter state
+    var protocolFilter by remember { mutableStateOf("All") }
+    var searchQuery by remember { mutableStateOf("") }
+    var rssiFilter by remember { mutableStateOf("All") }
+
+    // Apply filters
+    val filteredPackets = state.packets.filter { packet ->
+        // Protocol filter
+        val matchesProtocol = when (protocolFilter) {
+            "BLE" -> packet.protocol == "BLE"
+            "NFC" -> packet.protocol == "NFC"
+            else -> true
+        }
+
+        // Search filter
+        val matchesSearch = searchQuery.isEmpty() ||
+                packet.deviceName.contains(searchQuery, ignoreCase = true) ||
+                packet.macAddress.contains(searchQuery, ignoreCase = true)
+
+        // RSSI filter (only for BLE)
+        val matchesRssi = when (rssiFilter) {
+            "-60 and stronger" -> packet.protocol == "NFC" || packet.rssi >= -60
+            "-80 and stronger" -> packet.protocol == "NFC" || packet.rssi >= -80
+            else -> true
+        }
+
+        matchesProtocol && matchesSearch && matchesRssi
+    }
 
     Column(
         modifier = Modifier
@@ -174,14 +205,115 @@ fun ScanScreen(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
+        // Filter section
+        if (state.packets.isNotEmpty()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    // Protocol filter chips
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        FilterChip(
+                            selected = protocolFilter == "All",
+                            onClick = { protocolFilter = "All" },
+                            label = { Text("All") }
+                        )
+                        FilterChip(
+                            selected = protocolFilter == "BLE",
+                            onClick = { protocolFilter = "BLE" },
+                            label = { Text("BLE") }
+                        )
+                        FilterChip(
+                            selected = protocolFilter == "NFC",
+                            onClick = { protocolFilter = "NFC" },
+                            label = { Text("NFC") }
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Search field
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("Search name, UID, or MAC...") },
+                        leadingIcon = {
+                            Icon(Icons.Default.Search, contentDescription = null)
+                        },
+                        trailingIcon = {
+                            if (searchQuery.isNotEmpty()) {
+                                IconButton(onClick = { searchQuery = "" }) {
+                                    Icon(Icons.Default.Clear, contentDescription = "Clear")
+                                }
+                            }
+                        },
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // RSSI filter chips
+                    Text(
+                        text = "RSSI Filter (BLE only):",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        FilterChip(
+                            selected = rssiFilter == "All",
+                            onClick = { rssiFilter = "All" },
+                            label = { Text("All") }
+                        )
+                        FilterChip(
+                            selected = rssiFilter == "-80 and stronger",
+                            onClick = { rssiFilter = "-80 and stronger" },
+                            label = { Text("-80 dBm+") }
+                        )
+                        FilterChip(
+                            selected = rssiFilter == "-60 and stronger",
+                            onClick = { rssiFilter = "-60 and stronger" },
+                            label = { Text("-60 dBm+") }
+                        )
+                    }
+
+                    // Show filter results count
+                    if (filteredPackets.size != state.packets.size) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Showing ${filteredPackets.size} of ${state.packets.size} packets",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
         // Device list
-        if (state.packets.isEmpty() && !isScanning && !isNfcListening) {
+        if (filteredPackets.isEmpty() && !isScanning && !isNfcListening) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "No devices found yet. Start a BLE scan or tap an NFC tag.",
+                    text = if (state.packets.isEmpty()) {
+                        "No devices found yet. Start a BLE scan or tap an NFC tag."
+                    } else {
+                        "No packets match the current filters."
+                    },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -191,7 +323,7 @@ fun ScanScreen(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(state.packets, key = { it.id }) { packet ->
+                items(filteredPackets, key = { it.id }) { packet ->
                     DeviceItem(
                         packet = packet,
                         onClick = {
