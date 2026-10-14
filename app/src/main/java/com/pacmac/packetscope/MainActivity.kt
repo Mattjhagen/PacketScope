@@ -1,8 +1,14 @@
 package com.pacmac.packetscope
 
 import android.Manifest
+import android.app.PendingIntent
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.nfc.NfcAdapter
+import android.nfc.Tag
+import android.nfc.tech.Ndef
+import android.nfc.tech.NdefFormatable
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -26,6 +32,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.pacmac.packetscope.ui.screens.DetectScreen
+import com.pacmac.packetscope.ui.screens.DetailScreen
 import com.pacmac.packetscope.ui.screens.HistoryScreen
 import com.pacmac.packetscope.ui.screens.MapScreen
 import com.pacmac.packetscope.ui.screens.ScanScreen
@@ -36,6 +43,11 @@ class MainActivity : ComponentActivity() {
 
     private var showRationaleDialog by mutableStateOf(false)
     private var permissionsGranted by mutableStateOf(false)
+    private var nfcAdapter: NfcAdapter? = null
+    private var pendingIntent: PendingIntent? = null
+    private var intentFilters: Array<IntentFilter>? = null
+    private var techLists: Array<Array<String>>? = null
+    private lateinit var viewModel: ScannerViewModel
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -46,7 +58,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        checkNfcAvailability()
+        setupNfc()
         checkPermissions()
 
         setContent {
@@ -65,16 +77,78 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    PacketScopeApp()
+                    viewModel = viewModel()
+                    PacketScopeApp(viewModel)
                 }
             }
         }
     }
 
-    private fun checkNfcAvailability() {
-        val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
-        if (nfcAdapter == null) {
-            // Device doesn't support NFC
+    private fun setupNfc() {
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+
+        // Create pending intent for foreground dispatch
+        val intent = Intent(this, javaClass).apply {
+            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        }
+        pendingIntent = PendingIntent.getActivity(
+            this, 0, intent,
+            PendingIntent.FLAG_MUTABLE
+        )
+
+        // Setup intent filters for NFC tags
+        intentFilters = arrayOf(
+            IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED),
+            IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED),
+            IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED)
+        )
+
+        // Setup tech lists
+        techLists = arrayOf(
+            arrayOf(Ndef::class.java.name),
+            arrayOf(NdefFormatable::class.java.name)
+        )
+    }
+
+    override fun onResume() {
+        super.onResume()
+        enableNfcForegroundDispatch()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        disableNfcForegroundDispatch()
+    }
+
+    private fun enableNfcForegroundDispatch() {
+        nfcAdapter?.enableForegroundDispatch(
+            this,
+            pendingIntent,
+            intentFilters,
+            techLists
+        )
+    }
+
+    private fun disableNfcForegroundDispatch() {
+        nfcAdapter?.disableForegroundDispatch(this)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleNfcIntent(intent)
+    }
+
+    private fun handleNfcIntent(intent: Intent) {
+        if (NfcAdapter.ACTION_NDEF_DISCOVERED == intent.action ||
+            NfcAdapter.ACTION_TECH_DISCOVERED == intent.action ||
+            NfcAdapter.ACTION_TAG_DISCOVERED == intent.action) {
+
+            val tag: Tag? = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG)
+            tag?.let {
+                if (::viewModel.isInitialized) {
+                    viewModel.handleNfcTag(it)
+                }
+            }
         }
     }
 
@@ -134,9 +208,8 @@ fun PermissionRationaleDialog(
 }
 
 @Composable
-fun PacketScopeApp() {
+fun PacketScopeApp(scannerViewModel: ScannerViewModel) {
     val navController = rememberNavController()
-    val viewModel: ScannerViewModel = viewModel()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
@@ -206,7 +279,7 @@ fun PacketScopeApp() {
             modifier = Modifier.padding(paddingValues)
         ) {
             composable("scan") {
-                ScanScreen(viewModel, navController)
+                ScanScreen(scannerViewModel, navController)
             }
             composable("detect") {
                 DetectScreen()
@@ -219,7 +292,7 @@ fun PacketScopeApp() {
             }
             composable("detail/{packetId}") { backStackEntry ->
                 val packetId = backStackEntry.arguments?.getString("packetId")
-                val packet = viewModel.state.value.packets.find { it.id == packetId }
+                val packet = scannerViewModel.state.value.packets.find { it.id == packetId }
                 DetailScreen(packet)
             }
         }

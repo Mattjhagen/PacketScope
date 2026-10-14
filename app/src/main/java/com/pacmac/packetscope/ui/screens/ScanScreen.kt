@@ -30,6 +30,8 @@ fun ScanScreen(
     val state by viewModel.state.collectAsState()
     val isScanning by viewModel.isScanning.collectAsState()
     val scanError by viewModel.scanError.collectAsState()
+    val isNfcListening by viewModel.isNfcListening.collectAsState()
+    val nfcStatus by viewModel.nfcStatus.collectAsState()
 
     Column(
         modifier = Modifier
@@ -37,11 +39,21 @@ fun ScanScreen(
             .padding(16.dp)
     ) {
         // Status
-        Text(
-            text = if (isScanning) "LIVE" else "IDLE",
-            style = MaterialTheme.typography.titleLarge,
-            color = if (isScanning) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = if (isScanning) "BLE: LIVE" else "BLE: IDLE",
+                style = MaterialTheme.typography.titleMedium,
+                color = if (isScanning) Color(0xFF00BCD4) else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = if (isNfcListening) "NFC: LISTENING" else "NFC: OFF",
+                style = MaterialTheme.typography.titleMedium,
+                color = if (isNfcListening) Color(0xFF9C27B0) else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -71,23 +83,78 @@ fun ScanScreen(
                 )
             }
 
-            OutlinedButton(
-                onClick = { /* TODO: NFC scan */ },
+            Button(
+                onClick = {
+                    if (isNfcListening) {
+                        viewModel.stopNfcListening()
+                    } else {
+                        viewModel.startNfcListening()
+                    }
+                },
                 modifier = Modifier
                     .weight(1f)
                     .height(56.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colorScheme.secondary
-                )
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isNfcListening) Color(0xFFFF3B30) else Color(0xFF9C27B0)
+                ),
+                enabled = viewModel.isNfcAvailable() && viewModel.isNfcEnabled()
             ) {
                 Text(
-                    text = stringResource(R.string.scan_nfc),
+                    text = if (isNfcListening) "Stop NFC" else stringResource(R.string.scan_nfc),
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        // NFC status message
+        if (!viewModel.isNfcAvailable()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                )
+            ) {
+                Text(
+                    text = "NFC not available on this device",
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onErrorContainer
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+        } else if (!viewModel.isNfcEnabled()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                )
+            ) {
+                Text(
+                    text = "NFC is disabled. Enable it in Settings.",
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onErrorContainer
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+        } else if (isNfcListening && nfcStatus != null) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFF9C27B0).copy(alpha = 0.1f)
+                )
+            ) {
+                Text(
+                    text = nfcStatus!!,
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF9C27B0)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+        }
 
         // Error message
         scanError?.let { error ->
@@ -104,17 +171,17 @@ fun ScanScreen(
                     color = MaterialTheme.colorScheme.onErrorContainer
                 )
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
         // Device list
-        if (state.packets.isEmpty() && !isScanning) {
+        if (state.packets.isEmpty() && !isScanning && !isNfcListening) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "No devices found yet. Start a scan near your own BLE devices.",
+                    text = "No devices found yet. Start a BLE scan or tap an NFC tag.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -124,7 +191,7 @@ fun ScanScreen(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(state.packets, key = { it.macAddress }) { packet ->
+                items(state.packets, key = { it.id }) { packet ->
                     DeviceItem(
                         packet = packet,
                         onClick = {
@@ -142,6 +209,9 @@ private fun DeviceItem(
     packet: PacketRecord,
     onClick: () -> Unit
 ) {
+    val isNfc = packet.protocol == "NFC"
+    val protocolColor = if (isNfc) Color(0xFF9C27B0) else Color(0xFF00BCD4)
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -153,54 +223,91 @@ private fun DeviceItem(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Name and RSSI
+            // Protocol badge and name
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = packet.deviceName,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(1f)
-                )
-
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
                 ) {
+                    Surface(
+                        color = protocolColor,
+                        shape = MaterialTheme.shapes.small
+                    ) {
+                        Text(
+                            text = packet.protocol,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White
+                        )
+                    }
                     Text(
-                        text = "${packet.rssi} dBm",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary
+                        text = packet.deviceName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
-                    SignalStrengthBar(rssi = packet.rssi)
+                }
+
+                if (!isNfc) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "${packet.rssi} dBm",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        SignalStrengthBar(rssi = packet.rssi)
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // MAC address
+            // MAC address / UID
             Text(
-                text = packet.macAddress,
+                text = if (isNfc) "UID: ${packet.macAddress}" else packet.macAddress,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
+            // Show first NDEF record preview for NFC
+            if (isNfc && packet.serviceUuids.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = packet.serviceUuids.first().take(100),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = protocolColor,
+                    maxLines = 1
+                )
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Distance and timestamp
+            // Distance/timestamp
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = getDistanceLabel(packet.rssi),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = getDistanceColor(packet.rssi)
-                )
+                if (!isNfc) {
+                    Text(
+                        text = getDistanceLabel(packet.rssi),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = getDistanceColor(packet.rssi)
+                    )
+                } else {
+                    Text(
+                        text = "${packet.rawBytes.size} bytes",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
 
                 Text(
                     text = formatTimestamp(packet.timestamp),

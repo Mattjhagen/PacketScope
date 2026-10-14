@@ -1,9 +1,11 @@
 package com.pacmac.packetscope.viewmodel
 
 import android.app.Application
+import android.nfc.Tag
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.pacmac.packetscope.data.ble.BleScannerService
+import com.pacmac.packetscope.data.nfc.NfcReaderService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -39,6 +41,7 @@ data class ScannerState(
 
 class ScannerViewModel(application: Application) : AndroidViewModel(application) {
     private val bleScanner = BleScannerService(application)
+    private val nfcReader = NfcReaderService(application)
 
     private val _state = MutableStateFlow(ScannerState())
     val state: StateFlow<ScannerState> = _state.asStateFlow()
@@ -46,35 +49,24 @@ class ScannerViewModel(application: Application) : AndroidViewModel(application)
     val isScanning: StateFlow<Boolean> = bleScanner.isScanning
     val scanError: StateFlow<String?> = bleScanner.scanError
 
+    val isNfcListening: StateFlow<Boolean> = nfcReader.isListening
+    val nfcStatus: StateFlow<String?> = nfcReader.nfcStatus
+
     private val packetMap = mutableMapOf<String, PacketRecord>()
     private val maxPackets = 100
 
     init {
+        // Collect BLE packets
         viewModelScope.launch {
             bleScanner.packets.collect { packet ->
-                val existing = packetMap[packet.macAddress]
-                if (existing != null) {
-                    // Update existing packet with new RSSI and timestamp
-                    val updated = packet.copy(
-                        id = existing.id,
-                        timestamp = System.currentTimeMillis()
-                    )
-                    packetMap[packet.macAddress] = updated
-                } else {
-                    // Add new packet
-                    packetMap[packet.macAddress] = packet
+                addPacket(packet)
+            }
+        }
 
-                    // Keep only most recent 100
-                    if (packetMap.size > maxPackets) {
-                        val oldest = packetMap.values.minByOrNull { it.timestamp }
-                        oldest?.let { packetMap.remove(it.macAddress) }
-                    }
-                }
-
-                // Emit sorted by most recent
-                _state.value = _state.value.copy(
-                    packets = packetMap.values.sortedByDescending { it.timestamp }
-                )
+        // Collect NFC packets
+        viewModelScope.launch {
+            nfcReader.packets.collect { packet ->
+                addPacket(packet)
             }
         }
 
@@ -91,6 +83,45 @@ class ScannerViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    private fun addPacket(packet: PacketRecord) {
+        val key = if (packet.protocol == "NFC") {
+            "${packet.macAddress}_${packet.timestamp}" // NFC: deduplicate by UID + timestamp
+        } else {
+            packet.macAddress // BLE: deduplicate by MAC address
+        }
+
+        val existing = packetMap[key]
+        if (existing != null && packet.protocol == "BLE") {
+            // Update existing BLE packet with new RSSI and timestamp
+            val updated = packet.copy(
+                id = existing.id,
+                timestamp = System.currentTimeMillis()
+            )
+            packetMap[key] = updated
+        } else {
+            // Add new packet (NFC or new BLE device)
+            packetMap[key] = packet
+
+            // Keep only most recent 100
+            if (packetMap.size > maxPackets) {
+                val oldest = packetMap.values.minByOrNull { it.timestamp }
+                oldest?.let {
+                    val oldKey = if (it.protocol == "NFC") {
+                        "${it.macAddress}_${it.timestamp}"
+                    } else {
+                        it.macAddress
+                    }
+                    packetMap.remove(oldKey)
+                }
+            }
+        }
+
+        // Emit sorted by most recent
+        _state.value = _state.value.copy(
+            packets = packetMap.values.sortedByDescending { it.timestamp }
+        )
+    }
+
     fun startScan() {
         bleScanner.startScan()
     }
@@ -99,8 +130,29 @@ class ScannerViewModel(application: Application) : AndroidViewModel(application)
         bleScanner.stopScan()
     }
 
+    fun startNfcListening() {
+        nfcReader.startListening()
+    }
+
+    fun stopNfcListening() {
+        nfcReader.stopListening()
+    }
+
+    fun isNfcAvailable(): Boolean {
+        return nfcReader.isNfcAvailable()
+    }
+
+    fun isNfcEnabled(): Boolean {
+        return nfcReader.isNfcEnabled()
+    }
+
+    fun handleNfcTag(tag: Tag) {
+        nfcReader.handleTag(tag)
+    }
+
     override fun onCleared() {
         super.onCleared()
         bleScanner.stopScan()
+        nfcReader.stopListening()
     }
 }

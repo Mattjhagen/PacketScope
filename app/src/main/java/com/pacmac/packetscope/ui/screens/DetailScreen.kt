@@ -50,18 +50,26 @@ fun DetailScreen(packet: PacketRecord?) {
             )
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
+                val isNfc = packet.protocol == "NFC"
+
                 DetailRow("Device Name", packet.deviceName)
-                DetailRow("MAC Address", packet.macAddress)
-                DetailRow("RSSI", "${packet.rssi} dBm")
-                packet.txPower?.let { DetailRow("TX Power", "$it dBm") }
+                DetailRow(if (isNfc) "UID" else "MAC Address", packet.macAddress)
+                if (!isNfc) {
+                    DetailRow("RSSI", "${packet.rssi} dBm")
+                    packet.txPower?.let { DetailRow("TX Power", "$it dBm") }
+                }
                 DetailRow("Protocol", packet.protocol)
 
                 if (packet.serviceUuids.isNotEmpty()) {
-                    DetailRow("Service UUIDs", packet.serviceUuids.joinToString("\n"))
+                    DetailRow(
+                        if (isNfc) "NDEF Records" else "Service UUIDs",
+                        packet.serviceUuids.joinToString("\n")
+                    )
                 }
 
                 if (packet.manufacturerData.isNotEmpty()) {
-                    DetailRow("Manufacturer Data",
+                    DetailRow(
+                        if (isNfc) "Tag Info" else "Manufacturer Data",
                         packet.manufacturerData.entries.joinToString("\n") {
                             "${it.key}: ${it.value}"
                         }
