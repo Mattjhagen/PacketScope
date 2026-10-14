@@ -1,6 +1,9 @@
 package com.pacmac.packetscope.viewmodel
 
 import android.app.Application
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
+import android.content.Context
 import android.nfc.Tag
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -45,6 +48,9 @@ class ScannerViewModel(application: Application) : AndroidViewModel(application)
     private val nfcReader = NfcReaderService(application)
     val repository = PacketRepository(application)
 
+    private val bluetoothManager = application.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+    private val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
+
     private val _state = MutableStateFlow(ScannerState())
     val state: StateFlow<ScannerState> = _state.asStateFlow()
 
@@ -54,11 +60,18 @@ class ScannerViewModel(application: Application) : AndroidViewModel(application)
     val isNfcListening: StateFlow<Boolean> = nfcReader.isListening
     val nfcStatus: StateFlow<String?> = nfcReader.nfcStatus
 
+    private val _bluetoothEnabled = MutableStateFlow(bluetoothAdapter?.isEnabled == true)
+    val bluetoothEnabled: StateFlow<Boolean> = _bluetoothEnabled.asStateFlow()
+
     private val packetMap = mutableMapOf<String, PacketRecord>()
     private val maxPackets = 100
 
     private val _saveSessionMessage = MutableStateFlow<String?>(null)
     val saveSessionMessage: StateFlow<String?> = _saveSessionMessage.asStateFlow()
+
+    fun checkBluetoothState() {
+        _bluetoothEnabled.value = bluetoothAdapter?.isEnabled == true
+    }
 
     init {
         // Collect BLE packets

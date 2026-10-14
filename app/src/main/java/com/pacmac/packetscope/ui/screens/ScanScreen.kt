@@ -1,5 +1,12 @@
 package com.pacmac.packetscope.ui.screens
 
+import android.app.Activity
+import android.bluetooth.BluetoothAdapter
+import android.content.Intent
+import android.provider.Settings
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,6 +23,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -35,13 +43,43 @@ fun ScanScreen(
     viewModel: ScannerViewModel,
     navController: NavController? = null
 ) {
+    val context = LocalContext.current
     val state by viewModel.state.collectAsState()
     val isScanning by viewModel.isScanning.collectAsState()
     val scanError by viewModel.scanError.collectAsState()
     val isNfcListening by viewModel.isNfcListening.collectAsState()
     val saveSessionMessage by viewModel.saveSessionMessage.collectAsState()
+    val bluetoothEnabled by viewModel.bluetoothEnabled.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // Bluetooth enable launcher
+    val bluetoothEnableLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            viewModel.checkBluetoothState()
+            viewModel.startScan()
+        } else {
+            viewModel.checkBluetoothState()
+            Toast.makeText(
+                context,
+                "Bluetooth is needed for BLE scanning. You can enable it in Settings.",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    // Settings launcher
+    val settingsLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { _ ->
+        viewModel.checkBluetoothState()
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.checkBluetoothState()
+    }
 
     LaunchedEffect(saveSessionMessage) {
         saveSessionMessage?.let { message ->
@@ -186,23 +224,94 @@ fun ScanScreen(
                     Spacer(modifier = Modifier.height(12.dp))
                 }
 
-                // Error message
-                scanError?.let { error ->
+                // Bluetooth banner
+                if (!bluetoothEnabled) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFFFF3B30).copy(alpha = 0.1f)
+                            containerColor = Color(0xFFFF3B30).copy(alpha = 0.12f)
                         ),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text(
-                            text = error,
+                        Column(
                             modifier = Modifier.padding(16.dp),
-                            fontSize = 14.sp,
-                            color = Color(0xFFFF3B30)
-                        )
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Text(
+                                text = "Bluetooth is turned off. Enable it to scan for BLE devices.",
+                                fontSize = 14.sp,
+                                color = Color(0xFFFF3B30),
+                                lineHeight = 20.sp
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Button(
+                                    onClick = {
+                                        val enableIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                                        bluetoothEnableLauncher.launch(enableIntent)
+                                    },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(48.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(0xFF00D8FF)
+                                    ),
+                                    shape = RoundedCornerShape(24.dp)
+                                ) {
+                                    Text(
+                                        text = "Enable Bluetooth",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.Black
+                                    )
+                                }
+                                OutlinedButton(
+                                    onClick = {
+                                        val settingsIntent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
+                                        settingsLauncher.launch(settingsIntent)
+                                    },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(48.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(
+                                        contentColor = Color.White
+                                    ),
+                                    border = BorderStroke(1.dp, Color(0xFF3A3A4A)),
+                                    shape = RoundedCornerShape(24.dp)
+                                ) {
+                                    Text(
+                                        text = "Open Settings",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
                     }
                     Spacer(modifier = Modifier.height(12.dp))
+                }
+
+                // Error message (other errors)
+                scanError?.let { error ->
+                    if (!error.contains("Bluetooth is turned off")) {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color(0xFFFF3B30).copy(alpha = 0.1f)
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(
+                                text = error,
+                                modifier = Modifier.padding(16.dp),
+                                fontSize = 14.sp,
+                                color = Color(0xFFFF3B30)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
                 }
 
                 // Main content area
@@ -267,7 +376,14 @@ fun ScanScreen(
                         }
 
                         Button(
-                            onClick = { viewModel.startScan() },
+                            onClick = {
+                                if (!bluetoothEnabled) {
+                                    val enableIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                                    bluetoothEnableLauncher.launch(enableIntent)
+                                } else {
+                                    viewModel.startScan()
+                                }
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(56.dp),
