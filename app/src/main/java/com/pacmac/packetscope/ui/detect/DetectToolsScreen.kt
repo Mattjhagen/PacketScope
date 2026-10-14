@@ -1,5 +1,6 @@
 package com.pacmac.packetscope.ui.detect
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -22,7 +23,9 @@ import androidx.navigation.NavController
 
 @Composable
 fun DetectToolsScreen(navController: NavController) {
-    var guidanceExpanded by remember { mutableStateOf(true) }
+    var warningExpanded by remember { mutableStateOf(false) }
+    var guidanceExpanded by remember { mutableStateOf(false) }
+    var tipsExpanded by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -38,31 +41,39 @@ fun DetectToolsScreen(navController: NavController) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                Text(
-                    text = "Detection Tools",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-                Text(
-                    text = "Check for hidden devices",
-                    fontSize = 14.sp,
-                    color = Color(0xFF9AA0B4)
-                )
-            }
-
-            Surface(
-                color = Color(0xFF9AA0B4).copy(alpha = 0.2f),
-                shape = RoundedCornerShape(20.dp)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "IDLE",
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    fontSize = 12.sp,
+                    text = "Hidden Camera Detector",
+                    fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF9AA0B4)
+                    color = Color.White,
+                    letterSpacing = (-0.5).sp
                 )
+                Surface(
+                    color = Color(0xFF9AA0B4).copy(alpha = 0.2f),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .background(Color(0xFF9AA0B4), shape = CircleShape)
+                        )
+                        Text(
+                            text = "IDLE",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF9AA0B4)
+                        )
+                    }
+                }
             }
         }
 
@@ -70,15 +81,21 @@ fun DetectToolsScreen(navController: NavController) {
 
         // Warning banner
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { warningExpanded = !warningExpanded },
             colors = CardDefaults.cardColors(
                 containerColor = Color(0xFFFFA726).copy(alpha = 0.1f)
             ),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(20.dp),
+            border = BorderStroke(1.dp, Color(0xFFFFA726).copy(alpha = 0.3f))
         ) {
             Row(
-                modifier = Modifier.padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     imageVector = Icons.Default.Warning,
@@ -87,64 +104,34 @@ fun DetectToolsScreen(navController: NavController) {
                     modifier = Modifier.size(24.dp)
                 )
                 Text(
+                    text = "Detection limitations",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFFFA726),
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    imageVector = if (warningExpanded) Icons.Default.KeyboardArrowUp
+                    else Icons.Default.KeyboardArrowDown,
+                    contentDescription = null,
+                    tint = Color(0xFFFFA726)
+                )
+            }
+
+            if (warningExpanded) {
+                Text(
                     text = "Phone checks can help spot some cameras, not all. RF alone cannot confirm a hidden camera.",
                     fontSize = 14.sp,
                     color = Color(0xFFFFA726),
-                    lineHeight = 20.sp
+                    lineHeight = 20.sp,
+                    modifier = Modifier.padding(start = 52.dp, end = 16.dp, bottom = 16.dp)
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        // Collapsible guidance
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { guidanceExpanded = !guidanceExpanded },
-            colors = CardDefaults.cardColors(
-                containerColor = Color(0xFF1A1A26)
-            ),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "How to use",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                    Icon(
-                        imageVector = if (guidanceExpanded) Icons.Default.KeyboardArrowUp
-                        else Icons.Default.KeyboardArrowDown,
-                        contentDescription = null,
-                        tint = Color(0xFF9AA0B4)
-                    )
-                }
-
-                if (guidanceExpanded) {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = "1. Start with the Network scan to check WiFi devices\n" +
-                                "2. Use Infrared scan in dark rooms\n" +
-                                "3. Try Magnetic sweep near suspected areas\n" +
-                                "4. Lens Glint check with flashlight enabled",
-                        fontSize = 14.sp,
-                        color = Color(0xFF9AA0B4),
-                        lineHeight = 20.sp
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Tool list (vertical)
+        // Section header
         Text(
             text = "What to look for",
             fontSize = 18.sp,
@@ -154,23 +141,24 @@ fun DetectToolsScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        // Tool list (vertical)
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             ToolListItem(
-                icon = Icons.Default.Star,
+                icon = Icons.Default.Visibility,
                 title = "Infrared Scan",
                 description = "Find night-vision IR LEDs using the front camera",
                 onClick = { navController.navigate("infrared") }
             )
             ToolListItem(
-                icon = Icons.Default.Star,
+                icon = Icons.Default.FlashlightOn,
                 title = "Lens Glint Finder",
                 description = "Sweep with flashlight to spot camera lenses",
                 onClick = { navController.navigate("lens_glint") }
             )
             ToolListItem(
-                icon = Icons.Default.LocationOn,
+                icon = Icons.Default.Explore,
                 title = "Magnetic Sweep",
                 description = "Detect magnetic fields from hidden electronics",
                 onClick = { navController.navigate("magnetic") }
@@ -187,26 +175,49 @@ fun DetectToolsScreen(navController: NavController) {
 
         // Physical inspection tips
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { tipsExpanded = !tipsExpanded },
             colors = CardDefaults.cardColors(
                 containerColor = Color(0xFF1A1A26)
             ),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(20.dp),
+            border = BorderStroke(1.dp, Color(0xFF262636))
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    text = "Physical Inspection Tips",
+                    text = "Physical inspection tips",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
-                Spacer(modifier = Modifier.height(12.dp))
-                PhysicalTip("Check smoke detectors and air vents for unusual devices")
-                PhysicalTip("Inspect mirrors for two-way glass (fingernail test)")
-                PhysicalTip("Look for unusual holes in walls or decorations")
-                PhysicalTip("Examine power outlets and light fixtures")
+                Icon(
+                    imageVector = if (tipsExpanded) Icons.Default.KeyboardArrowUp
+                    else Icons.Default.KeyboardArrowDown,
+                    contentDescription = null,
+                    tint = Color(0xFF9AA0B4)
+                )
+            }
+
+            if (tipsExpanded) {
+                Column(
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                ) {
+                    PhysicalTip("Check smoke detectors and air vents for unusual devices")
+                    PhysicalTip("Inspect mirrors for two-way glass (fingernail test)")
+                    PhysicalTip("Look for unusual holes in walls or decorations")
+                    PhysicalTip("Examine power outlets and light fixtures")
+                }
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
@@ -225,7 +236,8 @@ private fun ToolListItem(
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFF1A1A26)
         ),
-        shape = RoundedCornerShape(20.dp)
+        shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(1.dp, Color(0xFF262636))
     ) {
         Row(
             modifier = Modifier
