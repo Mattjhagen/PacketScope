@@ -36,7 +36,6 @@ fun ScanScreen(
     val isScanning by viewModel.isScanning.collectAsState()
     val scanError by viewModel.scanError.collectAsState()
     val isNfcListening by viewModel.isNfcListening.collectAsState()
-    val nfcStatus by viewModel.nfcStatus.collectAsState()
     val saveSessionMessage by viewModel.saveSessionMessage.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -265,21 +264,47 @@ fun ScanScreen(
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
-        } else if (isNfcListening && nfcStatus != null) {
+        } else if (isNfcListening) {
+            // NFC instruction banner
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFF9C27B0).copy(alpha = 0.1f)
-                )
+                    containerColor = Color(0xFF8B5CF6).copy(alpha = 0.08f)
+                ),
+                shape = RoundedCornerShape(20.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF8B5CF6))
             ) {
-                Text(
-                    text = nfcStatus!!,
-                    modifier = Modifier.padding(12.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF9C27B0)
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Nfc,
+                        contentDescription = null,
+                        tint = Color(0xFF8B5CF6),
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        text = "Tap the NFC button and choose Scan NFC. Hold the tag against the top-back of your phone.",
+                        fontSize = 14.sp,
+                        color = Color.White,
+                        lineHeight = 20.sp,
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextButton(
+                        onClick = { viewModel.stopNfcListening() },
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = Color(0xFFFF3B30)
+                        )
+                    ) {
+                        Text("Cancel", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
             }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
         }
 
         // Error message

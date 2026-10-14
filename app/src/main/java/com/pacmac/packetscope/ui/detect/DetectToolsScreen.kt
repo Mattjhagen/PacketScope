@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -141,64 +142,45 @@ fun DetectToolsScreen(navController: NavController) {
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Tool grid
+        // Tool list (vertical)
         Text(
-            text = "Detection Methods",
+            text = "What to look for",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                ToolCard(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Default.Star,
-                    title = "Infrared",
-                    description = "Detect IR LEDs",
-                    color = Color(0xFF8B5CF6),
-                    onClick = { navController.navigate("infrared") }
-                )
-                ToolCard(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Default.Star,
-                    title = "Lens Glint",
-                    description = "Spot reflections",
-                    color = Color(0xFF00D8FF),
-                    onClick = { navController.navigate("lens_glint") }
-                )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                ToolCard(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Default.LocationOn,
-                    title = "Magnetic",
-                    description = "Find magnets",
-                    color = Color(0xFF2ECC71),
-                    onClick = { navController.navigate("magnetic") }
-                )
-                ToolCard(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Default.WifiFind,
-                    title = "Network",
-                    description = "WiFi devices",
-                    color = Color(0xFFFFA726),
-                    onClick = { navController.navigate("scan") }
-                )
-            }
+            ToolListItem(
+                icon = Icons.Default.Star,
+                title = "Infrared Scan",
+                description = "Find night-vision IR LEDs using the front camera",
+                onClick = { navController.navigate("infrared") }
+            )
+            ToolListItem(
+                icon = Icons.Default.Star,
+                title = "Lens Glint Finder",
+                description = "Sweep with flashlight to spot camera lenses",
+                onClick = { navController.navigate("lens_glint") }
+            )
+            ToolListItem(
+                icon = Icons.Default.LocationOn,
+                title = "Magnetic Sweep",
+                description = "Detect magnetic fields from hidden electronics",
+                onClick = { navController.navigate("magnetic") }
+            )
+            ToolListItem(
+                icon = Icons.Default.WifiFind,
+                title = "RF Network Scan",
+                description = "Scan Wi-Fi and Bluetooth for networked cameras",
+                onClick = { navController.navigate("scan") }
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -229,36 +211,50 @@ fun DetectToolsScreen(navController: NavController) {
 }
 
 @Composable
-private fun ToolCard(
-    modifier: Modifier = Modifier,
+private fun ToolListItem(
     icon: ImageVector,
     title: String,
     description: String,
-    color: Color,
     onClick: () -> Unit
 ) {
     Card(
-        modifier = modifier
-            .height(140.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(72.dp)
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = color.copy(alpha = 0.15f)
+            containerColor = Color(0xFF1A1A26)
         ),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(20.dp)
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = color,
-                modifier = Modifier.size(32.dp)
-            )
-            Column {
+            // Icon in circle
+            Surface(
+                modifier = Modifier.size(40.dp),
+                shape = CircleShape,
+                color = Color(0xFF262636)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+
+            // Title and description
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
                 Text(
                     text = title,
                     fontSize = 16.sp,
@@ -267,10 +263,19 @@ private fun ToolCard(
                 )
                 Text(
                     text = description,
-                    fontSize = 12.sp,
-                    color = Color(0xFF9AA0B4)
+                    fontSize = 14.sp,
+                    color = Color(0xFF9AA0B4),
+                    maxLines = 1
                 )
             }
+
+            // Chevron
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowRight,
+                contentDescription = null,
+                tint = Color(0xFF9AA0B4),
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }
