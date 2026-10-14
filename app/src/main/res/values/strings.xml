@@ -2,8 +2,9 @@
 <resources>
     <string name="app_name">PacketScope</string>
     <string name="scan">Scan</string>
-    <string name="my_devices">My Devices</string>
-    <string name="details">Details</string>
+    <string name="detect">Detect</string>
+    <string name="history">History</string>
+    <string name="map">Map</string>
     <string name="start_scan">Start Scan</string>
     <string name="scan_nfc">Scan NFC</string>
     <string name="scanner_idle">Scanner is idle</string>

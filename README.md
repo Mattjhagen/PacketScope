@@ -1,14 +1,23 @@
 # PacketScope
 
-BLE and NFC packet scanner for Android with real-time packet capture and analysis.
+Android app for BLE and NFC packet scanning with hidden camera detection features.
 
-## Features
+**⚠️ This is scaffolding only. BLE scanning and NFC reading are NOT yet implemented.**
 
-- **BLE Scanning**: Scan for nearby Bluetooth Low Energy devices
-- **NFC Reading**: Read NFC tags and cards
-- **Packet Analysis**: View detailed packet information
-- **Dark Theme**: Professional dark UI with cyan and purple accents
-- **Device Management**: Save and manage discovered devices
+## Current Screens
+
+- **Scan**: Idle state with "Start Scan" and "Scan NFC" buttons (non-functional)
+- **Detect**: Hidden camera detector placeholder with lens check guide, WiFi device list, and magnetometer reading
+- **History**: Tab-based history view (Scans/Devices/Threats) with paywall UI placeholder
+- **Map**: Saved scan location placeholder (no tracking, no logging)
+
+## Features (Planned)
+
+- BLE packet scanning
+- NFC tag reading
+- Hidden camera detection tools
+- Location-tagged scan history
+- Dark theme with cyan and purple accents
 
 ## Tech Stack
 
@@ -88,16 +97,19 @@ app/src/main/java/com/pacmac/packetscope/
 
 ✅ **Completed:**
 - Project scaffolding
-- Navigation setup (3 screens)
+- 4-tab navigation (Scan, Detect, History, Map)
 - Dark theme with custom palette
-- Permission handling
-- UI layouts for all screens
+- Permission declarations in manifest
+- UI shell for all screens
 
-🚧 **In Progress:**
-- BLE scanning implementation
-- NFC reading implementation
-- Packet parsing and display
-- Device persistence
+🚧 **TODO:**
+- Implement BLE scanning
+- Implement NFC reading
+- Implement camera detection features
+- Add packet parsing and display
+- Add device persistence
+- Implement location tagging
+- Add billing integration
 
 ## License
 

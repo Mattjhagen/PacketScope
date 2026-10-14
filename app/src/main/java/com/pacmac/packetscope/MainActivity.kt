@@ -18,8 +18,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.pacmac.packetscope.ui.screens.DetailScreen
-import com.pacmac.packetscope.ui.screens.MyDevicesScreen
+import com.pacmac.packetscope.ui.screens.DetectScreen
+import com.pacmac.packetscope.ui.screens.HistoryScreen
+import com.pacmac.packetscope.ui.screens.MapScreen
 import com.pacmac.packetscope.ui.screens.ScanScreen
 import com.pacmac.packetscope.ui.theme.PacketScopeTheme
 import com.pacmac.packetscope.viewmodel.ScannerViewModel
@@ -133,7 +134,7 @@ fun PacketScopeApp() {
     Scaffold(
         bottomBar = {
             NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
             ) {
                 NavigationBarItem(
                     icon = {},
@@ -143,15 +144,21 @@ fun PacketScopeApp() {
                 )
                 NavigationBarItem(
                     icon = {},
-                    label = { Text(stringResource(R.string.my_devices)) },
+                    label = { Text(stringResource(R.string.detect)) },
                     selected = false,
-                    onClick = { navController.navigate("devices") }
+                    onClick = { navController.navigate("detect") }
                 )
                 NavigationBarItem(
                     icon = {},
-                    label = { Text(stringResource(R.string.details)) },
+                    label = { Text(stringResource(R.string.history)) },
                     selected = false,
-                    onClick = { navController.navigate("details") }
+                    onClick = { navController.navigate("history") }
+                )
+                NavigationBarItem(
+                    icon = {},
+                    label = { Text(stringResource(R.string.map)) },
+                    selected = false,
+                    onClick = { navController.navigate("map") }
                 )
             }
         }
@@ -164,11 +171,14 @@ fun PacketScopeApp() {
             composable("scan") {
                 ScanScreen(viewModel)
             }
-            composable("devices") {
-                MyDevicesScreen()
+            composable("detect") {
+                DetectScreen()
             }
-            composable("details") {
-                DetailScreen()
+            composable("history") {
+                HistoryScreen()
+            }
+            composable("map") {
+                MapScreen()
             }
         }
     }
