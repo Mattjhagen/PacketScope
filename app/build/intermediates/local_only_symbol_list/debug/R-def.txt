@@ -1,0 +1,20 @@
+R_DEF: Internal format may change without notice
+local
+color ic_launcher_background
+drawable ic_launcher_foreground
+mipmap ic_launcher
+mipmap ic_launcher_round
+string app_name
+string cancel
+string detect
+string history
+string map
+string ok
+string permission_rationale_message
+string permission_rationale_title
+string scan
+string scan_nfc
+string scanner_idle
+string start_scan
+style Theme.PacketScope
+xml file_paths

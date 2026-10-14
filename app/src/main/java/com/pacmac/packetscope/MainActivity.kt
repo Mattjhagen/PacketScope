@@ -31,11 +31,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.pacmac.packetscope.ui.screens.DetectScreen
-import com.pacmac.packetscope.ui.screens.DetailScreen
-import com.pacmac.packetscope.ui.screens.HistoryScreen
-import com.pacmac.packetscope.ui.screens.MapScreen
-import com.pacmac.packetscope.ui.screens.ScanScreen
+import com.pacmac.packetscope.data.preferences.PreferencesManager
+import com.pacmac.packetscope.ui.detect.*
+import com.pacmac.packetscope.ui.onboarding.OnboardingFlow
+import com.pacmac.packetscope.ui.screens.*
 import com.pacmac.packetscope.ui.theme.PacketScopeTheme
 import com.pacmac.packetscope.viewmodel.ScannerViewModel
 
@@ -43,11 +42,13 @@ class MainActivity : ComponentActivity() {
 
     private var showRationaleDialog by mutableStateOf(false)
     private var permissionsGranted by mutableStateOf(false)
+    private var showOnboarding by mutableStateOf(false)
     private var nfcAdapter: NfcAdapter? = null
     private var pendingIntent: PendingIntent? = null
     private var intentFilters: Array<IntentFilter>? = null
     private var techLists: Array<Array<String>>? = null
     private lateinit var viewModel: ScannerViewModel
+    private lateinit var preferencesManager: PreferencesManager
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -58,6 +59,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        preferencesManager = PreferencesManager(this)
+        showOnboarding = !preferencesManager.hasSeenOnboarding
+
         setupNfc()
         checkPermissions()
 
@@ -67,18 +71,27 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    if (showRationaleDialog) {
-                        PermissionRationaleDialog(
-                            onDismiss = { showRationaleDialog = false },
-                            onConfirm = {
-                                showRationaleDialog = false
-                                requestPermissions()
+                    if (showOnboarding) {
+                        OnboardingFlow(
+                            onComplete = {
+                                preferencesManager.hasSeenOnboarding = true
+                                showOnboarding = false
                             }
                         )
-                    }
+                    } else {
+                        if (showRationaleDialog) {
+                            PermissionRationaleDialog(
+                                onDismiss = { showRationaleDialog = false },
+                                onConfirm = {
+                                    showRationaleDialog = false
+                                    requestPermissions()
+                                }
+                            )
+                        }
 
-                    viewModel = viewModel()
-                    PacketScopeApp(viewModel)
+                        viewModel = viewModel()
+                        PacketScopeApp(viewModel)
+                    }
                 }
             }
         }
@@ -282,7 +295,16 @@ fun PacketScopeApp(scannerViewModel: ScannerViewModel) {
                 ScanScreen(scannerViewModel, navController)
             }
             composable("detect") {
-                DetectScreen()
+                DetectToolsScreen(navController)
+            }
+            composable("infrared") {
+                InfraredScreen(navController)
+            }
+            composable("magnetic") {
+                MagneticScreen(navController)
+            }
+            composable("lens_glint") {
+                LensGlintScreen(navController)
             }
             composable("history") {
                 HistoryScreen()

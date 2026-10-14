@@ -1,14 +1,21 @@
 package com.pacmac.packetscope.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun HistoryScreen() {
@@ -18,30 +25,54 @@ fun HistoryScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color(0xFF0B0B14))
             .verticalScroll(rememberScrollState())
     ) {
         // Header
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "History",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(
+                    text = "History",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Text(
+                    text = "0 sessions",
+                    fontSize = 14.sp,
+                    color = Color(0xFF9AA0B4)
+                )
+            }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "IDLE",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Button(
+                onClick = { /* Export */ },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF00D8FF)
+                ),
+                shape = RoundedCornerShape(20.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.FileDownload,
+                    contentDescription = null,
+                    tint = Color.Black,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Export", color = Color.Black, fontSize = 14.sp)
+            }
         }
 
         // Tabs
         TabRow(
             selectedTabIndex = selectedTab,
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.primary
+            containerColor = Color(0xFF12121E),
+            contentColor = Color(0xFF00D8FF)
         ) {
             tabs.forEachIndexed { index, title ->
                 Tab(
@@ -50,92 +81,54 @@ fun HistoryScreen() {
                     text = {
                         Text(
                             text = title,
-                            style = MaterialTheme.typography.bodyMedium
+                            fontSize = 14.sp,
+                            fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal
                         )
                     }
                 )
             }
         }
 
+        Spacer(modifier = Modifier.height(24.dp))
+
         // Tab content - empty states
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(40.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = when (selectedTab) {
-                    0 -> "No scans yet"
-                    1 -> "No devices recorded"
-                    2 -> "No threats flagged"
-                    else -> ""
-                },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Paywall card
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
-        ) {
             Column(
-                modifier = Modifier.padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text(
-                    text = "🔒",
-                    style = MaterialTheme.typography.headlineLarge
+                Icon(
+                    imageVector = if (selectedTab == 2) Icons.Default.Search else Icons.Default.Search,
+                    contentDescription = null,
+                    tint = Color(0xFF9AA0B4),
+                    modifier = Modifier.size(64.dp)
                 )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
                 Text(
-                    text = "Subscribe to continue",
-                    style = MaterialTheme.typography.titleMedium,
+                    text = when (selectedTab) {
+                        0 -> "No scan sessions yet"
+                        1 -> "No devices recorded"
+                        2 -> "No threats flagged"
+                        else -> ""
+                    },
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = Color.White
                 )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
                 Text(
-                    text = "Unlock scan results, history, map, and camera detection.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = when (selectedTab) {
+                        0 -> "Start a scan to begin recording"
+                        1 -> "Devices from scans will appear here"
+                        2 -> "Flag devices from scans as threats"
+                        else -> ""
+                    },
+                    fontSize = 14.sp,
+                    color = Color(0xFF9AA0B4)
                 )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    OutlinedButton(
-                        onClick = { /* TODO */ },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("Go to scan")
-                    }
-
-                    Button(
-                        onClick = { /* TODO */ },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Text("View plans")
-                    }
-                }
             }
         }
     }

@@ -1,0 +1,204 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.pacmac.packetscope"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="31"
+9        android:targetSdkVersion="34" />
+10
+11    <!-- Bluetooth permissions -->
+12    <uses-permission
+12-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:6:5-7:38
+13        android:name="android.permission.BLUETOOTH"
+13-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:6:22-65
+14        android:maxSdkVersion="30" />
+14-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:7:9-35
+15    <uses-permission
+15-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:8:5-9:38
+16        android:name="android.permission.BLUETOOTH_ADMIN"
+16-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:8:22-71
+17        android:maxSdkVersion="30" />
+17-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:9:9-35
+18    <uses-permission
+18-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:10:5-12:31
+19        android:name="android.permission.BLUETOOTH_SCAN"
+19-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:10:22-70
+20        android:usesPermissionFlags="neverForLocation" />
+20-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:11:9-55
+21    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+21-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:13:5-76
+21-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:13:22-73
+22
+23    <!-- Location permission for BLE scanning -->
+24    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+24-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:16:5-79
+24-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:16:22-76
+25
+26    <!-- NFC permission -->
+27    <uses-permission android:name="android.permission.NFC" />
+27-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:19:5-62
+27-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:19:22-59
+28
+29    <!-- Required hardware features -->
+30    <uses-feature
+30-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:22:5-24:35
+31        android:name="android.hardware.bluetooth_le"
+31-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:23:9-53
+32        android:required="true" />
+32-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:24:9-32
+33    <uses-feature
+33-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:25:5-27:35
+34        android:name="android.hardware.nfc"
+34-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:26:9-44
+35        android:required="true" />
+35-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:27:9-32
+36
+37    <permission
+37-->[androidx.core:core:1.12.0] /Users/matt/.gradle/caches/transforms-3/2ccd268e0ca2e1cd10ec650ac8067a3e/transformed/core-1.12.0/AndroidManifest.xml:22:5-24:47
+38        android:name="com.pacmac.packetscope.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+38-->[androidx.core:core:1.12.0] /Users/matt/.gradle/caches/transforms-3/2ccd268e0ca2e1cd10ec650ac8067a3e/transformed/core-1.12.0/AndroidManifest.xml:23:9-81
+39        android:protectionLevel="signature" />
+39-->[androidx.core:core:1.12.0] /Users/matt/.gradle/caches/transforms-3/2ccd268e0ca2e1cd10ec650ac8067a3e/transformed/core-1.12.0/AndroidManifest.xml:24:9-44
+40
+41    <uses-permission android:name="com.pacmac.packetscope.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+41-->[androidx.core:core:1.12.0] /Users/matt/.gradle/caches/transforms-3/2ccd268e0ca2e1cd10ec650ac8067a3e/transformed/core-1.12.0/AndroidManifest.xml:26:5-97
+41-->[androidx.core:core:1.12.0] /Users/matt/.gradle/caches/transforms-3/2ccd268e0ca2e1cd10ec650ac8067a3e/transformed/core-1.12.0/AndroidManifest.xml:26:22-94
+42
+43    <application
+43-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:29:5-56:19
+44        android:allowBackup="true"
+44-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:30:9-35
+45        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+45-->[androidx.core:core:1.12.0] /Users/matt/.gradle/caches/transforms-3/2ccd268e0ca2e1cd10ec650ac8067a3e/transformed/core-1.12.0/AndroidManifest.xml:28:18-86
+46        android:debuggable="true"
+47        android:extractNativeLibs="false"
+48        android:icon="@mipmap/ic_launcher"
+48-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:31:9-43
+49        android:label="@string/app_name"
+49-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:32:9-41
+50        android:roundIcon="@mipmap/ic_launcher_round"
+50-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:33:9-54
+51        android:supportsRtl="true"
+51-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:34:9-35
+52        android:theme="@style/Theme.PacketScope" >
+52-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:35:9-49
+53        <activity
+53-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:37:9-45:20
+54            android:name="com.pacmac.packetscope.MainActivity"
+54-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:38:13-41
+55            android:exported="true"
+55-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:39:13-36
+56            android:theme="@style/Theme.PacketScope" >
+56-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:40:13-53
+57            <intent-filter>
+57-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:41:13-44:29
+58                <action android:name="android.intent.action.MAIN" />
+58-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:42:17-69
+58-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:42:25-66
+59
+60                <category android:name="android.intent.category.LAUNCHER" />
+60-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:43:17-77
+60-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:43:27-74
+61            </intent-filter>
+62        </activity>
+63
+64        <provider
+65            android:name="androidx.core.content.FileProvider"
+65-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:48:13-62
+66            android:authorities="com.pacmac.packetscope.fileprovider"
+66-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:49:13-64
+67            android:exported="false"
+67-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:50:13-37
+68            android:grantUriPermissions="true" >
+68-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:51:13-47
+69            <meta-data
+69-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:52:13-54:54
+70                android:name="android.support.FILE_PROVIDER_PATHS"
+70-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:53:17-67
+71                android:resource="@xml/file_paths" />
+71-->/Users/matt/PacketScope/app/src/main/AndroidManifest.xml:54:17-51
+72        </provider>
+73
+74        <activity
+74-->[androidx.compose.ui:ui-test-manifest:1.5.4] /Users/matt/.gradle/caches/transforms-3/6e78813e9bffd2c2a75e45fd8305dc50/transformed/jetified-ui-test-manifest-1.5.4/AndroidManifest.xml:23:9-25:39
+75            android:name="androidx.activity.ComponentActivity"
+75-->[androidx.compose.ui:ui-test-manifest:1.5.4] /Users/matt/.gradle/caches/transforms-3/6e78813e9bffd2c2a75e45fd8305dc50/transformed/jetified-ui-test-manifest-1.5.4/AndroidManifest.xml:24:13-63
+76            android:exported="true" />
+76-->[androidx.compose.ui:ui-test-manifest:1.5.4] /Users/matt/.gradle/caches/transforms-3/6e78813e9bffd2c2a75e45fd8305dc50/transformed/jetified-ui-test-manifest-1.5.4/AndroidManifest.xml:25:13-36
+77        <activity
+77-->[androidx.compose.ui:ui-tooling-android:1.5.4] /Users/matt/.gradle/caches/transforms-3/302289d9f82de1ba5cb1b0f6032a8b32/transformed/jetified-ui-tooling-release/AndroidManifest.xml:23:9-25:39
+78            android:name="androidx.compose.ui.tooling.PreviewActivity"
+78-->[androidx.compose.ui:ui-tooling-android:1.5.4] /Users/matt/.gradle/caches/transforms-3/302289d9f82de1ba5cb1b0f6032a8b32/transformed/jetified-ui-tooling-release/AndroidManifest.xml:24:13-71
+79            android:exported="true" />
+79-->[androidx.compose.ui:ui-tooling-android:1.5.4] /Users/matt/.gradle/caches/transforms-3/302289d9f82de1ba5cb1b0f6032a8b32/transformed/jetified-ui-tooling-release/AndroidManifest.xml:25:13-36
+80
+81        <provider
+81-->[androidx.emoji2:emoji2:1.4.0] /Users/matt/.gradle/caches/transforms-3/8a116d6c90f90674631436edc1f6e8c1/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:24:9-32:20
+82            android:name="androidx.startup.InitializationProvider"
+82-->[androidx.emoji2:emoji2:1.4.0] /Users/matt/.gradle/caches/transforms-3/8a116d6c90f90674631436edc1f6e8c1/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:25:13-67
+83            android:authorities="com.pacmac.packetscope.androidx-startup"
+83-->[androidx.emoji2:emoji2:1.4.0] /Users/matt/.gradle/caches/transforms-3/8a116d6c90f90674631436edc1f6e8c1/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:26:13-68
+84            android:exported="false" >
+84-->[androidx.emoji2:emoji2:1.4.0] /Users/matt/.gradle/caches/transforms-3/8a116d6c90f90674631436edc1f6e8c1/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:27:13-37
+85            <meta-data
+85-->[androidx.emoji2:emoji2:1.4.0] /Users/matt/.gradle/caches/transforms-3/8a116d6c90f90674631436edc1f6e8c1/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:29:13-31:52
+86                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+86-->[androidx.emoji2:emoji2:1.4.0] /Users/matt/.gradle/caches/transforms-3/8a116d6c90f90674631436edc1f6e8c1/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:30:17-75
+87                android:value="androidx.startup" />
+87-->[androidx.emoji2:emoji2:1.4.0] /Users/matt/.gradle/caches/transforms-3/8a116d6c90f90674631436edc1f6e8c1/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:31:17-49
+88            <meta-data
+88-->[androidx.lifecycle:lifecycle-process:2.6.2] /Users/matt/.gradle/caches/transforms-3/a87653f823cc6292df5b23ce4123ef1b/transformed/jetified-lifecycle-process-2.6.2/AndroidManifest.xml:29:13-31:52
+89                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+89-->[androidx.lifecycle:lifecycle-process:2.6.2] /Users/matt/.gradle/caches/transforms-3/a87653f823cc6292df5b23ce4123ef1b/transformed/jetified-lifecycle-process-2.6.2/AndroidManifest.xml:30:17-78
+90                android:value="androidx.startup" />
+90-->[androidx.lifecycle:lifecycle-process:2.6.2] /Users/matt/.gradle/caches/transforms-3/a87653f823cc6292df5b23ce4123ef1b/transformed/jetified-lifecycle-process-2.6.2/AndroidManifest.xml:31:17-49
+91            <meta-data
+91-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/matt/.gradle/caches/transforms-3/820e62f0b30c90bc6c88badac0db92dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:29:13-31:52
+92                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+92-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/matt/.gradle/caches/transforms-3/820e62f0b30c90bc6c88badac0db92dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:30:17-85
+93                android:value="androidx.startup" />
+93-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/matt/.gradle/caches/transforms-3/820e62f0b30c90bc6c88badac0db92dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:31:17-49
+94        </provider>
+95
+96        <receiver
+96-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/matt/.gradle/caches/transforms-3/820e62f0b30c90bc6c88badac0db92dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:34:9-52:20
+97            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+97-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/matt/.gradle/caches/transforms-3/820e62f0b30c90bc6c88badac0db92dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:35:13-76
+98            android:directBootAware="false"
+98-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/matt/.gradle/caches/transforms-3/820e62f0b30c90bc6c88badac0db92dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:36:13-44
+99            android:enabled="true"
+99-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/matt/.gradle/caches/transforms-3/820e62f0b30c90bc6c88badac0db92dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:37:13-35
+100            android:exported="true"
+100-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/matt/.gradle/caches/transforms-3/820e62f0b30c90bc6c88badac0db92dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:38:13-36
+101            android:permission="android.permission.DUMP" >
+101-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/matt/.gradle/caches/transforms-3/820e62f0b30c90bc6c88badac0db92dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:39:13-57
+102            <intent-filter>
+102-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/matt/.gradle/caches/transforms-3/820e62f0b30c90bc6c88badac0db92dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:40:13-42:29
+103                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+103-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/matt/.gradle/caches/transforms-3/820e62f0b30c90bc6c88badac0db92dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:41:17-91
+103-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/matt/.gradle/caches/transforms-3/820e62f0b30c90bc6c88badac0db92dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:41:25-88
+104            </intent-filter>
+105            <intent-filter>
+105-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/matt/.gradle/caches/transforms-3/820e62f0b30c90bc6c88badac0db92dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:43:13-45:29
+106                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+106-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/matt/.gradle/caches/transforms-3/820e62f0b30c90bc6c88badac0db92dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:44:17-85
+106-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/matt/.gradle/caches/transforms-3/820e62f0b30c90bc6c88badac0db92dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:44:25-82
+107            </intent-filter>
+108            <intent-filter>
+108-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/matt/.gradle/caches/transforms-3/820e62f0b30c90bc6c88badac0db92dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:46:13-48:29
+109                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+109-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/matt/.gradle/caches/transforms-3/820e62f0b30c90bc6c88badac0db92dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:47:17-88
+109-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/matt/.gradle/caches/transforms-3/820e62f0b30c90bc6c88badac0db92dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:47:25-85
+110            </intent-filter>
+111            <intent-filter>
+111-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/matt/.gradle/caches/transforms-3/820e62f0b30c90bc6c88badac0db92dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:49:13-51:29
+112                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+112-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/matt/.gradle/caches/transforms-3/820e62f0b30c90bc6c88badac0db92dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:50:17-95
+112-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/matt/.gradle/caches/transforms-3/820e62f0b30c90bc6c88badac0db92dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:50:25-92
+113            </intent-filter>
+114        </receiver>
+115    </application>
+116
+117</manifest>

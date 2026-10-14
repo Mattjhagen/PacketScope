@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "/Users/matt/.gradle/daemon/8.2/com.pacmac.packetscope.app-merged_res-51:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "/Users/matt/.gradle/daemon/8.2/com.pacmac.packetscope.app-main-53:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.pacmac.packetscope.app-merged_res-51:/xml_file_paths.xml.flat",
+        "source": "com.pacmac.packetscope.app-main-53:/xml/file_paths.xml"
+    },
+    {
+        "merged": "/Users/matt/.gradle/daemon/8.2/com.pacmac.packetscope.app-merged_res-51:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "/Users/matt/.gradle/daemon/8.2/com.pacmac.packetscope.app-main-53:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "/Users/matt/.gradle/daemon/8.2/com.pacmac.packetscope.app-merged_res-51:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "/Users/matt/.gradle/daemon/8.2/com.pacmac.packetscope.app-main-53:/drawable/ic_launcher_foreground.xml"
+    }
+]
