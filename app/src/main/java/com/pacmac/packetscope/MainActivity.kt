@@ -16,15 +16,15 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.RadioButtonChecked
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.NavHost
@@ -58,6 +58,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Enable edge-to-edge
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.statusBarColor = android.graphics.Color.TRANSPARENT
+        window.navigationBarColor = android.graphics.Color.TRANSPARENT
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
 
         preferencesManager = PreferencesManager(this)
         showOnboarding = !preferencesManager.hasSeenOnboarding
@@ -229,62 +235,64 @@ fun PacketScopeApp(scannerViewModel: ScannerViewModel) {
     Scaffold(
         bottomBar = {
             NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                containerColor = Color(0xFF12121E),
+                modifier = Modifier.height(72.dp)
             ) {
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.RadioButtonChecked, contentDescription = null) },
-                    label = { Text(stringResource(R.string.scan)) },
+                    icon = { Icon(Icons.Default.Radar, contentDescription = null) },
+                    label = { Text("Scan") },
                     selected = currentDestination?.hierarchy?.any { it.route == "scan" } == true,
                     onClick = { navController.navigate("scan") },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.onSecondary,
-                        selectedTextColor = MaterialTheme.colorScheme.secondary,
-                        indicatorColor = MaterialTheme.colorScheme.secondary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        selectedIconColor = Color.Black,
+                        selectedTextColor = Color.White,
+                        indicatorColor = Color(0xFF8B5CF6),
+                        unselectedIconColor = Color(0xFF9AA0B4),
+                        unselectedTextColor = Color(0xFF9AA0B4)
                     )
                 )
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Search, contentDescription = null) },
-                    label = { Text(stringResource(R.string.detect)) },
+                    label = { Text("Detect") },
                     selected = currentDestination?.hierarchy?.any { it.route == "detect" } == true,
                     onClick = { navController.navigate("detect") },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.onSecondary,
-                        selectedTextColor = MaterialTheme.colorScheme.secondary,
-                        indicatorColor = MaterialTheme.colorScheme.secondary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        selectedIconColor = Color.Black,
+                        selectedTextColor = Color.White,
+                        indicatorColor = Color(0xFF8B5CF6),
+                        unselectedIconColor = Color(0xFF9AA0B4),
+                        unselectedTextColor = Color(0xFF9AA0B4)
                     )
                 )
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.History, contentDescription = null) },
-                    label = { Text(stringResource(R.string.history)) },
+                    label = { Text("History") },
                     selected = currentDestination?.hierarchy?.any { it.route == "history" } == true,
                     onClick = { navController.navigate("history") },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.onSecondary,
-                        selectedTextColor = MaterialTheme.colorScheme.secondary,
-                        indicatorColor = MaterialTheme.colorScheme.secondary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        selectedIconColor = Color.Black,
+                        selectedTextColor = Color.White,
+                        indicatorColor = Color(0xFF8B5CF6),
+                        unselectedIconColor = Color(0xFF9AA0B4),
+                        unselectedTextColor = Color(0xFF9AA0B4)
                     )
                 )
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Map, contentDescription = null) },
-                    label = { Text(stringResource(R.string.map)) },
+                    label = { Text("Map") },
                     selected = currentDestination?.hierarchy?.any { it.route == "map" } == true,
                     onClick = { navController.navigate("map") },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.onSecondary,
-                        selectedTextColor = MaterialTheme.colorScheme.secondary,
-                        indicatorColor = MaterialTheme.colorScheme.secondary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        selectedIconColor = Color.Black,
+                        selectedTextColor = Color.White,
+                        indicatorColor = Color(0xFF8B5CF6),
+                        unselectedIconColor = Color(0xFF9AA0B4),
+                        unselectedTextColor = Color(0xFF9AA0B4)
                     )
                 )
             }
-        }
+        },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
         NavHost(
             navController = navController,
