@@ -5,8 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,6 +33,16 @@ fun ScanScreen(
     val scanError by viewModel.scanError.collectAsState()
     val isNfcListening by viewModel.isNfcListening.collectAsState()
     val nfcStatus by viewModel.nfcStatus.collectAsState()
+    val saveSessionMessage by viewModel.saveSessionMessage.collectAsState()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(saveSessionMessage) {
+        saveSessionMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.clearSaveSessionMessage()
+        }
+    }
 
     // Filter state
     var protocolFilter by remember { mutableStateOf("All") }
@@ -64,11 +73,15 @@ fun ScanScreen(
         matchesProtocol && matchesSearch && matchesRssi
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp)
+        ) {
         // Status
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -134,6 +147,27 @@ fun ScanScreen(
                     text = if (isNfcListening) "Stop NFC" else stringResource(R.string.scan_nfc),
                     style = MaterialTheme.typography.bodyLarge
                 )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Save Session button (show when stopped and has packets)
+        if (!isScanning && !isNfcListening && state.packets.isNotEmpty()) {
+            OutlinedButton(
+                onClick = { viewModel.saveCurrentSession() },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = Color(0xFF2ECC71)
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Save Session (${state.packets.size} packets)")
             }
         }
 
@@ -332,6 +366,7 @@ fun ScanScreen(
                     )
                 }
             }
+        }
         }
     }
 }

@@ -5,6 +5,7 @@ import android.nfc.Tag
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.pacmac.packetscope.data.ble.BleScannerService
+import com.pacmac.packetscope.data.local.*
 import com.pacmac.packetscope.data.nfc.NfcReaderService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -42,6 +43,7 @@ data class ScannerState(
 class ScannerViewModel(application: Application) : AndroidViewModel(application) {
     private val bleScanner = BleScannerService(application)
     private val nfcReader = NfcReaderService(application)
+    val repository = PacketRepository(application)
 
     private val _state = MutableStateFlow(ScannerState())
     val state: StateFlow<ScannerState> = _state.asStateFlow()
@@ -54,6 +56,9 @@ class ScannerViewModel(application: Application) : AndroidViewModel(application)
 
     private val packetMap = mutableMapOf<String, PacketRecord>()
     private val maxPackets = 100
+
+    private val _saveSessionMessage = MutableStateFlow<String?>(null)
+    val saveSessionMessage: StateFlow<String?> = _saveSessionMessage.asStateFlow()
 
     init {
         // Collect BLE packets
@@ -148,6 +153,75 @@ class ScannerViewModel(application: Application) : AndroidViewModel(application)
 
     fun handleNfcTag(tag: Tag) {
         nfcReader.handleTag(tag)
+    }
+
+    fun saveCurrentSession(location: android.location.Location? = null) {
+        viewModelScope.launch {
+            try {
+                val packets = _state.value.packets
+                if (packets.isEmpty()) {
+                    _saveSessionMessage.value = "No packets to save"
+                    return@launch
+                }
+
+                val sessionType = when {
+                    packets.any { it.protocol == "BLE" } && packets.any { it.protocol == "NFC" } -> "Mixed"
+                    packets.any { it.protocol == "NFC" } -> "NFC"
+                    else -> "BLE"
+                }
+
+                val session = ScanSession(
+                    timestamp = System.currentTimeMillis(),
+                    type = sessionType,
+                    count = packets.size,
+                    locationLat = location?.latitude,
+                    locationLon = location?.longitude
+                )
+
+                val sessionId = repository.insertSession(session)
+
+                val savedPackets = packets.map { packet ->
+                    SavedPacket(
+                        sessionId = sessionId,
+                        protocol = packet.protocol,
+                        name = packet.deviceName,
+                        identifier = packet.macAddress,
+                        rssi = packet.rssi,
+                        timestamp = packet.timestamp,
+                        rawBytesHex = packet.rawBytes.joinToString("") { "%02X".format(it) }
+                    )
+                }
+
+                repository.insertPackets(savedPackets)
+                _saveSessionMessage.value = "Session saved (${packets.size} packets)"
+            } catch (e: Exception) {
+                _saveSessionMessage.value = "Failed to save session"
+            }
+        }
+    }
+
+    fun clearSaveSessionMessage() {
+        _saveSessionMessage.value = null
+    }
+
+    fun markAsMyDevice(packet: PacketRecord, note: String = "") {
+        viewModelScope.launch {
+            val device = MyDevice(
+                identifier = packet.macAddress,
+                name = packet.deviceName,
+                type = packet.protocol,
+                addedTimestamp = System.currentTimeMillis(),
+                note = note
+            )
+            repository.insertMyDevice(device)
+            repository.updateMineStatus(packet.macAddress, true)
+        }
+    }
+
+    fun markAsThreat(identifier: String, isThreat: Boolean) {
+        viewModelScope.launch {
+            repository.updateThreatStatus(identifier, isThreat)
+        }
     }
 
     override fun onCleared() {

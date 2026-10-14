@@ -315,7 +315,7 @@ fun PacketScopeApp(scannerViewModel: ScannerViewModel) {
             composable("detail/{packetId}") { backStackEntry ->
                 val packetId = backStackEntry.arguments?.getString("packetId")
                 val packet = scannerViewModel.state.value.packets.find { it.id == packetId }
-                DetailScreen(packet)
+                DetailScreen(packet, scannerViewModel)
             }
         }
     }

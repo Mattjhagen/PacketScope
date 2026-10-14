@@ -1,30 +1,40 @@
 package com.pacmac.packetscope.ui.screens
 
 import android.content.Intent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pacmac.packetscope.ui.components.HexDumpView
 import com.pacmac.packetscope.viewmodel.PacketRecord
+import com.pacmac.packetscope.viewmodel.ScannerViewModel
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 @Composable
-fun DetailScreen(packet: PacketRecord?) {
+fun DetailScreen(
+    packet: PacketRecord?,
+    viewModel: ScannerViewModel = viewModel()
+) {
     val context = LocalContext.current
+    var showMarkDialog by remember { mutableStateOf(false) }
+    var noteText by remember { mutableStateOf("") }
 
     if (packet == null) {
         Box(
@@ -107,6 +117,72 @@ fun DetailScreen(packet: PacketRecord?) {
                 }
                 DetailRow("Timestamp", formatTimestamp(packet.timestamp))
             }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Mark buttons
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            OutlinedButton(
+                onClick = { showMarkDialog = true },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = Color(0xFF2ECC71)
+                )
+            ) {
+                Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Mark as Mine")
+            }
+
+            OutlinedButton(
+                onClick = { viewModel.markAsThreat(packet.macAddress, true) },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = Color(0xFFFF3B30)
+                )
+            ) {
+                Icon(Icons.Default.Warning, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Mark Threat")
+            }
+        }
+
+        if (showMarkDialog) {
+            AlertDialog(
+                onDismissRequest = { showMarkDialog = false },
+                title = { Text("Add to My Devices") },
+                text = {
+                    Column {
+                        Text("Add a note (optional):")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = noteText,
+                            onValueChange = { noteText = it },
+                            placeholder = { Text("e.g., Living room speaker") },
+                            singleLine = false,
+                            maxLines = 3
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        viewModel.markAsMyDevice(packet, noteText)
+                        showMarkDialog = false
+                        noteText = ""
+                    }) {
+                        Text("Save")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showMarkDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
